@@ -7,13 +7,20 @@
 
 import SwiftUI
 
+struct storing: Identifiable{
+    var id = UUID()
+    var name: String
+    var checkBox: Bool
+}
+
 struct ContentView: View {
     
     @State private var textToAdd = ""
-    @State private var activityList = [String]()
+    @State private var activityList = [storing(name: "sdfs", checkBox: false)]
     @State var emptyAlert = false
-    
-    
+    // @State var isCompletedBox = false
+    @State var selectedIndex = 0
+    @State var index = 0
     var body: some View {
         
         NavigationView {
@@ -32,18 +39,27 @@ struct ContentView: View {
                             }
                         }
                     }
+                    //checkmark.square
                     Section{
                         if activityList.isEmpty {
                             Text("No Activity Is To Be Done")
                         }
-                        ForEach(activityList, id: \.self) {
-                            Text($0)
+                        ForEach(activityList) { i in
+                            HStack{
+                                Image(systemName: i.checkBox ?  "checkmark.square" : "square")
+                                    .onTapGesture {
+                                        gestureTapp(value: i)
+                                        //i.checkBox.toggle()
+                                        //self.isCompletedBox.toggle()
+                                        //isCompletedBox.toggle()
+                                        //print(i)
+                                    }
+                                    .foregroundColor(Color.blue).imageScale(.large)
+                                Text(i.name)
+                            }
                         }//.onDelete(perform: )
                         .onDelete(perform: removeRows)
                         .onMove(perform: move)
-                     //   .strikethrough(emptyAlert, color: .black)
-
-
                     }header:{
                         Text("List To Be Done")
                     }
@@ -51,7 +67,6 @@ struct ContentView: View {
                     EditButton()
                 }//.listStyle(GroupedListStyle())
                 .listStyle(.grouped)
-
                 Button(){
                     addText()
                 }label:{
@@ -87,14 +102,20 @@ struct ContentView: View {
     
     func addText(){
         guard textToAdd.isEmpty else{
-            activityList.append(textToAdd)
+            activityList.append(storing(name: textToAdd, checkBox: false))
             textToAdd = ""
             return
         }
         emptyAlert.toggle()
-       
+        
+    }
+    
+    func gestureTapp(value: storing){
+        //value.checkBox = true
+        print(value.checkBox)
     }
 }
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
