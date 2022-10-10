@@ -13,6 +13,13 @@ struct storing: Identifiable{
     var checkBox: Bool
 }
 
+
+enum Sections: String, CaseIterable {
+    case pending = "List To Be Done"
+    case completed = "Completed Activity"
+}
+
+
 struct ContentView: View {
     
     @State private var textToAdd = ""
@@ -21,6 +28,16 @@ struct ContentView: View {
     // @State var isCompletedBox = false
     @State var selectedIndex = 0
     @State var index = 0
+   // @Binding var storingCheck: storing
+    
+    var pendingTasks: [Binding<storing>] {
+        $activityList.filter { !$0.checkBox.wrappedValue }
+    }
+    
+    var completedTasks: [Binding<storing>] {
+        $activityList.filter { $0.checkBox.wrappedValue }
+    }
+    
     var body: some View {
         
         NavigationView {
@@ -39,29 +56,29 @@ struct ContentView: View {
                             }
                         }
                     }
-                    //checkmark.square
-                    Section{
-                        if activityList.isEmpty {
-                            Text("No Activity Is To Be Done")
-                        }
-                        ForEach(activityList) { i in
-                            HStack{
-                                Image(systemName: i.checkBox ?  "checkmark.square" : "square")
-                                    .onTapGesture {
-                                        gestureTapp(value: i)
-                                        //i.checkBox.toggle()
-                                        //self.isCompletedBox.toggle()
-                                        //isCompletedBox.toggle()
-                                        //print(i)
-                                    }
-                                    .foregroundColor(Color.blue).imageScale(.large)
-                                Text(i.name)
+                    ForEach(Sections.allCases, id: \.self) { section in
+                        Section {
+                            let filteredTasks = section == .pending ? pendingTasks: completedTasks
+                            if filteredTasks.isEmpty {
+                                Text("No tasks available.")
                             }
-                        }//.onDelete(perform: )
-                        .onDelete(perform: removeRows)
-                        .onMove(perform: move)
-                    }header:{
-                        Text("List To Be Done")
+                            Section{
+                                ForEach(filteredTasks) { $task in
+                                    HStack{
+                                        Image(systemName: task.checkBox ?  "checkmark.square" : "square")
+                                            .onTapGesture {
+                                                task.checkBox.toggle()
+                                            }
+                                            .foregroundColor(Color.blue).imageScale(.large)
+                                        Text(task.name)
+                                    }
+                                }
+                                .onDelete(perform: removeRows)
+                                .onMove(perform: move)
+                            }
+                        }header: {
+                            Text(section.rawValue)
+                        }
                     }
                 }.toolbar(){
                     EditButton()
@@ -89,7 +106,6 @@ struct ContentView: View {
                       secondaryButton: .destructive(Text("Close"))
                 )
             }
-            
         }
     }
     func removeRows(at offsets: IndexSet) {
