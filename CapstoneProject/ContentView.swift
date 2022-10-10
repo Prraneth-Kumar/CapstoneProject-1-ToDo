@@ -11,6 +11,7 @@ struct storing: Identifiable{
     var id = UUID()
     var name: String
     var checkBox: Bool
+    var strikeThrough: Bool
 }
 
 
@@ -23,12 +24,10 @@ enum Sections: String, CaseIterable {
 struct ContentView: View {
     
     @State private var textToAdd = ""
-    @State private var activityList = [storing(name: "sdfs", checkBox: false)]
+    @State private var activityList = [storing(name: "sdfs", checkBox: false, strikeThrough: false)]
     @State var emptyAlert = false
-    // @State var isCompletedBox = false
     @State var selectedIndex = 0
     @State var index = 0
-   // @Binding var storingCheck: storing
     
     var pendingTasks: [Binding<storing>] {
         $activityList.filter { !$0.checkBox.wrappedValue }
@@ -68,9 +67,11 @@ struct ContentView: View {
                                         Image(systemName: task.checkBox ?  "checkmark.square" : "square")
                                             .onTapGesture {
                                                 task.checkBox.toggle()
+                                                task.strikeThrough.toggle()
                                             }
                                             .foregroundColor(Color.blue).imageScale(.large)
                                         Text(task.name)
+                                            .strikethrough(task.strikeThrough, pattern: .dashDot  , color: .red )
                                     }
                                 }
                                 .onDelete(perform: removeRows)
@@ -98,7 +99,6 @@ struct ContentView: View {
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .navigationTitle("TodoList")
                 .navigationBarTitleDisplayMode(.inline)
-                
             }.alert(isPresented: $emptyAlert){
                 Alert(title: Text("Enter Activity"),
                       message: Text("The TextField is Empty"),
@@ -118,7 +118,7 @@ struct ContentView: View {
     
     func addText(){
         guard textToAdd.isEmpty else{
-            activityList.append(storing(name: textToAdd, checkBox: false))
+            activityList.append(storing(name: textToAdd, checkBox: false,strikeThrough: false))
             textToAdd = ""
             return
         }
