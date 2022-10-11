@@ -15,10 +15,6 @@ struct storing: Identifiable{
 }
 
 
-enum Sections: String, CaseIterable {
-    case pending = "List To Be Done"
-    case completed = "Completed Activity"
-}
 
 
 struct ContentView: View {
@@ -29,13 +25,7 @@ struct ContentView: View {
     @State var selectedIndex = 0
     @State var index = 0
     
-    var pendingTasks: [Binding<storing>] {
-        $activityList.filter { !$0.checkBox.wrappedValue }
-    }
-    
-    var completedTasks: [Binding<storing>] {
-        $activityList.filter { $0.checkBox.wrappedValue }
-    }
+   
     
     var body: some View {
         
@@ -55,32 +45,51 @@ struct ContentView: View {
                             }
                         }
                     }
-                    ForEach(Sections.allCases, id: \.self) { section in
-                        Section {
-                            let filteredTasks = section == .pending ? pendingTasks: completedTasks
-                            if filteredTasks.isEmpty {
-                                Text("No tasks available.")
-                            }
-                            Section{
-                                ForEach(filteredTasks) { $task in
-                                    HStack{
-                                        Image(systemName: task.checkBox ?  "checkmark.square" : "square")
-                                            .onTapGesture {
-                                                task.checkBox.toggle()
-                                                task.strikeThrough.toggle()
-                                            }
-                                            .foregroundColor(Color.blue).imageScale(.large)
-                                        Text(task.name)
-                                            .strikethrough(task.strikeThrough, pattern: .dashDot  , color: .red )
-                                    }
+                    Section{
+                        ForEach($activityList) { $task in
+                            
+                            if !task.checkBox {
+                                HStack{
+                                    Image(systemName: task.checkBox ?  "checkmark.square" : "square")
+                                        .onTapGesture {
+                                            task.checkBox.toggle()
+                                            task.strikeThrough.toggle()
+                                        }
+                                        .foregroundColor(Color.blue).imageScale(.large)
+                                    Text(task.name)
+                                        .strikethrough(task.strikeThrough, pattern: .dashDot  , color: .red )
                                 }
-                                .onDelete(perform: removeRows)
-                                .onMove(perform: move)
                             }
-                        }header: {
-                            Text(section.rawValue)
                         }
+                        .onDelete(perform: removeRows)
+                        .onMove(perform: move)
+                    } header: {
+                        Text("LIST TO BE DONE")
                     }
+                    Section{
+                        ForEach($activityList) { $task in
+                            
+                            if task.checkBox {
+                                HStack{
+                                    Image(systemName: task.checkBox ?  "checkmark.square" : "square")
+                                        .onTapGesture {
+                                            task.checkBox.toggle()
+                                            task.strikeThrough.toggle()
+                                        }
+                                        .foregroundColor(Color.blue).imageScale(.large)
+                                    Text(task.name)
+                                        .strikethrough(task.strikeThrough, pattern: .dashDot  , color: .red )
+                                }
+                            }
+                        }
+                        .onDelete(perform: removeRows)
+                        .onMove(perform: move)
+                    }header: {
+                        Text("COMPLETED LIST")
+                    }
+                    
+               
+                    
                 }.toolbar(){
                     EditButton()
                 }//.listStyle(GroupedListStyle())
